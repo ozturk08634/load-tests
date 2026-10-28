@@ -77,7 +77,7 @@ jobs:
           echo "envcheck: cklen=${#CK} ualen=${#UA} addr=$ADDR"
           mkdir -p ck ck/rs
           cp -f ck/cf_cookie.txt ck/rs/cf_cookie.txt 2>/dev/null || true
-          ( while true; do sleep 600; (cd ck/rs && SOLVE_FAM=v6 SOLVE_PORT=9344 timeout 150 xvfb-run -a node "$GITHUB_WORKSPACE/solve.js" >/dev/null 2>&1) || true; [ -s ck/rs/cf_cookie.txt ] && cp -f ck/rs/cf_cookie.txt ck/cf_cookie.txt && cp -f ck/rs/cf_ua.txt ck/cf_ua.txt && echo "cookie refreshed in-flight"; done ) &
+          ( while true; do sleep 240; (cd ck/rs && SOLVE_FAM=v6 SOLVE_PORT=9344 timeout 150 xvfb-run -a node "$GITHUB_WORKSPACE/solve.js" >/dev/null 2>&1) || true; [ -s ck/rs/cf_cookie.txt ] && cp -f ck/rs/cf_cookie.txt ck/cf_cookie.txt && cp -f ck/rs/cf_ua.txt ck/cf_ua.txt && echo "cookie refreshed in-flight"; done ) &
           RS=$!
           export CF_COOKIE="$CK" CF_UA="$UA" LOCAL_IP="$ADDR"
           export CF_COOKIE_FILE="$PWD/ck/cf_cookie.txt" CF_UA_FILE="$PWD/ck/cf_ua.txt"
