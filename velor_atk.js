@@ -51,7 +51,7 @@ function req(o={}){
     const done=v=>{if(fin)return;fin=true;clearTimeout(wd);res(v);};
     const opt={host:DIRECT?IP:HOST,port:443,path:P,method,agent,headers:h,localAddress:LOCAL||undefined};
     if(DIRECT)opt.servername=HOST;
-    if(LOCAL){ opt.family = LOCAL.indexOf(':')>=0 ? 6 : 4; }
+    if(LOCAL){ opt.family = LOCAL.indexOf(':')>=0 ? 6 : 4; } else if(process.env.FORCE_FAM){ opt.family = parseInt(process.env.FORCE_FAM,10); }
     const q=https.request(opt,s=>{
       let n=0,b=''; s.on('data',c=>{n+=c.length;if(b.length<400)b+=c;});
       s.on('end',()=>done({code:s.statusCode,ms:Math.round(performance.now()-t0),bytes:n,
@@ -205,7 +205,7 @@ async function h2run(){
   const pid0=await baseline();
   if(MODE==='probe'){L('done');return;}
   if(MODE==='hold'){await hold();L('done');return;}
-  if(MODE==='h2'||MODE==='h2trk'){await h2run();const p1=await baseline();L(pid0===p1?'pid stable':(p1==='?'?'pid unreadable at post-check (health no-answer)':'PID CHANGED '+pid0+'->'+p1));L('done');return;}
+  if(MODE==='h2'||MODE==='h2trk'||MODE==='h2lb'){await h2run();const p1=await baseline();L(pid0===p1?'pid stable':(p1==='?'?'pid unreadable at post-check (health no-answer)':'PID CHANGED '+pid0+'->'+p1));L('done');return;}
   const endAt=Date.now()+DUR*1000; let sent=0,closes=0; const codes={}; let first429=null;
   const mon=setInterval(async()=>{const p=await req({path:'/api/health',timeout:8000});
     L(`  t+${DUR-Math.round((endAt-Date.now())/1000)}s health=${p.code}/${p.ms}ms`);},5000);
